@@ -30,6 +30,7 @@ namespace MiniAOP.TestConsole
             u.Password = "fdsfda";
             List<IAdvice> advice = new List<IAdvice>() {
                  new BeforeAdvice_Log(),
+                 new AfterAdvice_Log(),
                   new BeforeAdvice_Authorize(){  TokenParamIndex = 0}
             };
             IMehodInterceptor methodInterceptor = new MehodInterceptor_Audit();
@@ -42,6 +43,11 @@ namespace MiniAOP.TestConsole
             Console.WriteLine("user:{0},password:{1},loginToken:{2}", "lj", "1234", token);
             String password;
             userProxy.GetMyPassword(token, "jjjjjjjjj", out password);
+            String un;
+            String pw;
+            String unref = "";
+            String pwref = "";
+            userProxy.GetUserDetails(token, "lj", out un, "", out pw, ref unref, ref pwref);
             Console.WriteLine("password:{0}", password);
             try
             {

@@ -13,8 +13,9 @@ namespace MiniAOP
         /// </summary>
         /// <param name="returnValue">方法返回值</param>
         /// <param name="method"></param>
-        /// <param name="args">传入给方法的参数（包含out参数）</param>
+        /// <param name="outAndrefArgs">传入给方法的out和ref参数</param>
+        /// <param name="args">传入给方法的参数（包含out和ref的参数）</param>
         /// <param name="target"></param>
-        void Notice(object returnValue, MethodBase method, object[] args, object target);
+        void Notice(object returnValue, MethodBase method, object[] outAndrefArgs, object[] args, object target);
     }
 }

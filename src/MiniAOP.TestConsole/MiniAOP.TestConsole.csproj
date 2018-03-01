@@ -46,6 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AfterAdvice_Log.cs" />
+    <Compile Include="AfterAdvice_LogAttribute.cs" />
     <Compile Include="BeforeAdvice_Authorize.cs" />
     <Compile Include="BeforeAdvice_AuthorizeAttribute.cs" />
     <Compile Include="BeforeAdvice_Log.cs" />

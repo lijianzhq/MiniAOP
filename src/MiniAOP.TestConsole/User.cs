@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace MiniAOP.TestConsole
 {
     [BeforeAdvice_Log]
+    [AfterAdvice_Log]
     [BeforeAdvice_Authorize]
     [MehodInterceptor_Audit]
     [ExceptionAdvice]
@@ -46,6 +47,22 @@ namespace MiniAOP.TestConsole
         public static Boolean IsUserLogin(String token)
         {
             return loginUserToken.Contains(token);
+        }
+
+        public void GetUserDetails(String token, String userName, out String un, String pp, out String pw, ref String unref, ref String pwref)
+        {
+            un = "";
+            pw = "";
+            foreach (User u in allUsers)
+            {
+                if (String.Equals(u.UserName, userName))
+                {
+                    un = "un" + u.UserName;
+                    unref = "unref" + u.UserName;
+                    pw = "pw" + u.Password;
+                    pwref = "pwref" + u.Password;
+                }
+            }
         }
 
         public void GetMyPassword(String token, String passwordIn, out String passwordOut)

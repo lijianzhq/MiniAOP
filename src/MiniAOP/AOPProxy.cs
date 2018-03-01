@@ -65,7 +65,8 @@ namespace MiniAOP
             try
             {
                 breakMethod = false;
-                Object[] methodArgs = GetMethodArgs(methodCallMsg, out int outParamCount);
+                int outParamCount = 0;
+                Object[] methodArgs = GetMethodArgs(methodCallMsg, out outParamCount);
                 Object returnVal = method.Invoke(this._proxyTarget, methodArgs);
                 return new ReturnMessage(returnVal, methodArgs, outParamCount, methodCallMsg.LogicalCallContext, methodCallMsg);
             }
@@ -86,7 +87,7 @@ namespace MiniAOP
             ReturnMessage breakReturnMsg = Before(method, methodCallMsg);
             if (breakReturnMsg != null) return breakReturnMsg;
             //环绕注入
-            Object returnVal = null;
+            //Object returnVal = null;
             Boolean breakMethod = true;
             ReturnMessage methodReturnMsg = null;
             if (this.mehodInterceptor != null)
@@ -100,7 +101,8 @@ namespace MiniAOP
                 if (breakMethod) return methodReturnMsg;
             }
             //后置通知
-            breakReturnMsg = After(returnVal, method, methodReturnMsg.OutArgs, methodCallMsg);
+            //breakReturnMsg = After(returnVal, method, methodReturnMsg.OutArgs, methodCallMsg);
+            breakReturnMsg = After(methodReturnMsg.ReturnValue, method, methodReturnMsg.OutArgs, methodCallMsg);
             if (breakReturnMsg != null) return breakReturnMsg;
             //返回方法执行的结果
             return methodReturnMsg;
@@ -143,12 +145,14 @@ namespace MiniAOP
             breakMethod = true;
             try
             {
-                Object[] methodArgs = GetMethodArgs(methodCallMsg, out int outParamCount);
+                int outParamCount = 0;
+                Object[] methodArgs = GetMethodArgs(methodCallMsg, out outParamCount);
                 reVal = mehodInterceptor.Notice(method, methodArgs, this._proxyTarget);
                 if (reVal != null && reVal.BreakMethod)
                 {
-                    Exception ex = reVal.Ex ?? new Exception(String.Format("{0} break method!", mehodInterceptor.GetType().ToString()));
-                    returnMsg = new ReturnMessage(ex, methodCallMsg);
+                    Exception ex = reVal.Ex ?? new Exception(String.Format("{0} break method!", mehodInterceptor.GetType().FullName));
+                    //returnMsg = new ReturnMessage(ex, methodCallMsg);
+                    throw ex;
                 }
                 else
                 {
@@ -180,21 +184,26 @@ namespace MiniAOP
                 foreach (IBeforeAdvice ad in beforeAdviceList)
                 {
                     reVal = ad.Notice(method, methodCallMsg.Args, this._proxyTarget);
-                    //如果一旦前置通知返回false，则直接退出所有执行，直接返回了
+                    //如果一旦前置通知BreakMethod返回true，则直接退出所有执行，直接返回了
+                    //if (reVal != null && reVal.BreakMethod)
+                    //{
+                    //    Exception ex = reVal.Ex ?? new Exception(String.Format("{0} break method!", ad.GetType().FullName));
+                    //    returnMsg = new ReturnMessage(ex, methodCallMsg);
+                    //    break;
+                    //}
                     if (reVal != null && reVal.BreakMethod)
                     {
-                        Exception ex = reVal.Ex ?? new Exception(String.Format("{0} break method!", ad.GetType().ToString()));
-                        returnMsg = new ReturnMessage(ex, methodCallMsg);
-                        break;
+                        Exception ex = reVal.Ex ?? new Exception(String.Format("{0} break method!", ad.GetType().FullName));
+                        throw ex;
                     }
                 }
+                return returnMsg;
             }
             catch (Exception ex)
             {
                 //returnMsg = new ReturnMessage(ex.InnerException ?? ex, methodCallMsg);
                 return Exception(ex.InnerException ?? ex, method, methodCallMsg);
             }
-            return returnMsg;
         }
 
         /// <summary>
@@ -202,10 +211,10 @@ namespace MiniAOP
         /// </summary>
         /// <param name="returnValue"></param>
         /// <param name="method"></param>
-        /// <param name="args"></param>
+        /// <param name="outAndrefArgs"></param>
         /// <param name="methodCallMsg"></param>
         /// <returns></returns>
-        public virtual ReturnMessage After(object returnValue, MethodBase method, object[] args, IMethodCallMessage methodCallMsg)
+        public virtual ReturnMessage After(object returnValue, MethodBase method, object[] outAndrefArgs, IMethodCallMessage methodCallMsg)
         {
             ReturnMessage returnMsg = null;
             try
@@ -214,7 +223,7 @@ namespace MiniAOP
                 {
                     foreach (IAfterAdvice ad in afterAdviceList)
                     {
-                        ad.Notice(returnValue, method, args, this._proxyTarget);
+                        ad.Notice(returnValue, method, outAndrefArgs, methodCallMsg.Args, this._proxyTarget);
                     }
                 }
             }
