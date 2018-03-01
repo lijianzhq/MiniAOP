@@ -194,7 +194,9 @@ namespace MiniAOP
                     if (reVal != null && reVal.BreakMethod)
                     {
                         Exception ex = reVal.Ex ?? new Exception(String.Format("{0} break method!", ad.GetType().FullName));
-                        throw ex;
+                        //这里一定不能用throw的方式，throw会重新捕获当前执行栈的内存快照，所有堆栈信息都中断了（重置了），外部没办法根据异常信息定位到具体的异常点位了。
+                        //throw ex;
+                        return Exception(ex.InnerException ?? ex, method, methodCallMsg);
                     }
                 }
                 return returnMsg;
